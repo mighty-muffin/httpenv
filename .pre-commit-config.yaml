@@ -43,13 +43,20 @@ repos:
       - id: alphabetize-codeowners
       - id: fix-smartquotes
       - id: fix-ligatures
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.41.0
+    hooks:
+      - id: markdownlint
+        args:
+          - --config
+          - .config/.markdown-lint.yml
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.35.1
     hooks:
       - id: yamllint
         args:
           - -c
-          - .config/.yamllint.yml
+          - .config/.yaml-lint.yml
   - repo: https://github.com/rhysd/actionlint
     rev: v1.7.1
     hooks:
