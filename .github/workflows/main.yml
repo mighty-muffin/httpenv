@@ -263,12 +263,12 @@ jobs:
 
       - name: Pull image to scan
         run: |
-          docker pull ${{ env.IMAGE-NAMES }}:${{ steps.docker_meta.outputs.labels }}
+          docker pull ${{ env.IMAGE-NAMES }}:${{ steps.docker_meta.outputs.tags }}
 
       - name: Run Trivy for HIGH,CRITICAL CVEs and report (blocking)
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          image-ref: ${{ env.IMAGE-NAMES }}:${{ steps.docker_meta.outputs.labels }}
+          image-ref: ${{ env.IMAGE-NAMES }}:${{ steps.docker_meta.outputs.tags }}
           exit-code: 0
           ignore-unfixed: true
           vuln-type: 'os,library'
