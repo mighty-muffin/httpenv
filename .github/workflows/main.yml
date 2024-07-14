@@ -106,7 +106,7 @@ jobs:
 
     env:
       COMMENT-ENABLE: true
-      CONTEXT: .
+      CONTEXT: "."
       FILE: false
       FLAVOR-RULES: latest=auto
       GHCR-ENABLE: true
