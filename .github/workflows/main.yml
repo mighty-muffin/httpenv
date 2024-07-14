@@ -156,8 +156,8 @@ jobs:
           platforms: ${{ env.PLATFORMS }}
           # {{ env.CONTEXT }}
           context: .
-          # {{ env.FILE }}
-          target: ${{ env.TARGET }}
+          # file: {{ env.FILE }}
+          # target: ${{ env.TARGET }}
           builder: ${{ steps.buildx.outputs.name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
