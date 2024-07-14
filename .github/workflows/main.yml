@@ -86,8 +86,8 @@ jobs:
       with:
         category: "/language:${{matrix.language}}"
 
-  docker-build:
-    name: Docker - Build Image
+  build-test-image:
+    name: Docker - Build Test Image
     runs-on: ubuntu-24.04
     timeout-minutes: 5
 
@@ -106,7 +106,6 @@ jobs:
 
     env:
       COMMENT-ENABLE: true
-      CONTEXT: "."
       FILE: false
       FLAVOR-RULES: latest=auto
       GHCR-ENABLE: true
@@ -154,7 +153,7 @@ jobs:
         uses: docker/build-push-action@v6.3.0
         with:
           platforms: ${{ env.PLATFORMS }}
-          context: ${{ env.CONTEXT }}
+          context: .
           file: ${{ env.FILE }}
           target: ${{ env.TARGET }}
           builder: ${{ steps.buildx.outputs.name }}
@@ -206,3 +205,75 @@ jobs:
         run: |
           # shellcheck disable=SC2086
           echo "image-tag=${{ steps.docker_meta.outputs.version }}" >> $GITHUB_OUTPUT
+
+  sca:
+    name: Docker - Scan Test Image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    needs:
+      - build-test-image
+      - sast
+
+    permissions:
+      contents: read
+      packages: read
+      security-events: write
+
+    env:
+      COMMENT-ENABLE: true
+      FILE: false
+      FLAVOR-RULES: latest=auto
+      GHCR-ENABLE: true
+      IMAGE-NAMES: ghcr.io/${{ github.repository }}
+      PLATFORMS: linux/amd64,linux/arm64
+      PUSH: true
+      TAG-RULES: |
+        type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
+        type=raw,value=latest,enable={{is_default_branch}},priority=100
+        type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}},priority=300
+        type=ref,event=pr,priority=100
+        type=ref,event=tag,priority=200
+      TARGET: false
+
+    steps:
+
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      - name: Login to GHCR
+        if: env.GHCR-ENABLE
+        uses: docker/login-action@v3.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta
+        id: docker_meta
+        uses: docker/metadata-action@v5.5.1
+        with:
+          images: ${{ env.IMAGE-NAMES }}
+          flavor: ${{ env.FLAVOR-RULES }}
+          tags: ${{ env.TAG-RULES }}
+
+      - name: Pull image to scan
+        run: |
+          docker pull ${{ env.IMAGE-NAMES }}:${{ steps.docker_meta.outputs.labels }}
+
+      - name: Run Trivy for HIGH,CRITICAL CVEs and report (blocking)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: ${{ env.IMAGE-NAMES }}:${{ steps.docker_meta.outputs.labels }}
+          exit-code: 0
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'HIGH,CRITICAL'
+          format: 'sarif'
+          output: 'results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results.sarif
+          category: results
