@@ -95,7 +95,7 @@ jobs:
       - secret-scanning
 
     outputs:
-      image-tag: ${{ steps.image-tag.outputs.image-tag }}
+      image-tag: ${{ steps.docker_meta.outputs.labels }}
 
     permissions:
       attestations: write
@@ -173,7 +173,7 @@ jobs:
       #   id: attest
       #   with:
       #     subject-name: ${{ env.IMAGE-NAMES }}
-      #     subject-digest: ${{ steps.docker_meta.outputs.labels }}
+      #     subject-digest: ${{ steps.docker_meta.outputs.digest }}
       #     push-to-registry: true
 
       - name: Find comment for image tags
