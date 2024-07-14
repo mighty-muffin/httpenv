@@ -92,7 +92,7 @@ jobs:
     timeout-minutes: 5
 
     needs:
-      - sast
+      - secret-scanning
 
     outputs:
       image-tag: ${{ steps.image-tag.outputs.image-tag }}
