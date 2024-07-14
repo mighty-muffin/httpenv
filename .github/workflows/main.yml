@@ -42,7 +42,7 @@ jobs:
           GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
   sast:
-    name: CodeQL - Analyze (${{ matrix.language }})
+    name: CodeQL - Analyze ${{ matrix.language }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
 
@@ -106,7 +106,7 @@ jobs:
 
     env:
       COMMENT-ENABLE: true
-      CONTEXT: false
+      CONTEXT: .
       FILE: false
       FLAVOR-RULES: latest=auto
       GHCR-ENABLE: true
