@@ -119,6 +119,7 @@ jobs:
         type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}},priority=300
         type=ref,event=pr,priority=100
         type=ref,event=tag,priority=200
+        type=sha
       TARGET: false
 
     steps:
