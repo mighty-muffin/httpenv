@@ -155,7 +155,7 @@ jobs:
         with:
           platforms: ${{ env.PLATFORMS }}
           # {{ env.CONTEXT }}
-          context: .  $
+          context: .
           # {{ env.FILE }}
           target: ${{ env.TARGET }}
           builder: ${{ steps.buildx.outputs.name }}
