@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 FROM docker.io/library/golang:alpine3.20
 COPY httpenv.go /go
 RUN go build httpenv.go
