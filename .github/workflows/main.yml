@@ -178,7 +178,7 @@ jobs:
 
       - name: Find comment for image tags
         uses: peter-evans/find-comment@v3.1.0
-        if: github.event_name == 'pull_request' && env.comment-enable
+        if: github.event_name == 'pull_request' && env.COMMENT-ENABLE
         id: fc
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -187,7 +187,7 @@ jobs:
 
       - name: Create or update comment for image tags
         uses: peter-evans/create-or-update-comment@v4.0.0
-        if: github.event_name == 'pull_request' && env.comment-enable
+        if: github.event_name == 'pull_request' && env.COMMENT-ENABLE
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
