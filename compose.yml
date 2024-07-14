@@ -5,7 +5,7 @@ services:
   httpenv:
     init: true
     container_name: httpenv
-    image: ghcr.io/irishlab-io/httpenv:latest
+    image: ghcr.io/irishlab-io/httpenv:stable-20240714-17bcc02
     pull_policy: always
     env_file: .env
     restart: unless-stopped
