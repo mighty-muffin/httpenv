@@ -106,6 +106,7 @@ jobs:
 
     env:
       COMMENT-ENABLE: true
+      CONTEXT: true
       FILE: false
       FLAVOR-RULES: latest=auto
       GHCR-ENABLE: true
@@ -153,8 +154,9 @@ jobs:
         uses: docker/build-push-action@v6.3.0
         with:
           platforms: ${{ env.PLATFORMS }}
-          context: .
-          file: ${{ env.FILE }}
+          # {{ env.CONTEXT }}
+          context: .  $
+          # {{ env.FILE }}
           target: ${{ env.TARGET }}
           builder: ${{ steps.buildx.outputs.name }}
           cache-from: type=gha
