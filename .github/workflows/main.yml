@@ -406,8 +406,8 @@ jobs:
             ```
           edit-mode: replace
 
-      - name: Find the primary image tag we just pushed, and output it
-        id: image-tag
-        run: |
-          # shellcheck disable=SC2086
-          echo "image-tag=${{ steps.docker_meta.outputs.tags }}" >> $GITHUB_OUTPUT
+      # - name: Find the primary image tag we just pushed, and output it
+      #   id: image-tag
+      #   run: |
+      #     # shellcheck disable=SC2086
+      #     echo "image-tag=${{ steps.docker_meta.outputs.tags }}" >> $GITHUB_OUTPUT
