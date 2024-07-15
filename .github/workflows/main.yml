@@ -268,7 +268,7 @@ jobs:
       - name: Run Trivy for HIGH,CRITICAL CVEs and report (blocking)
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          image-ref: ${{ steps.docker_meta.outputs.tags }}
+          image-ref: ${{ steps.docker_meta.outputs.tags }}[1]
           exit-code: 0
           ignore-unfixed: true
           vuln-type: 'os,library'
@@ -281,3 +281,28 @@ jobs:
         with:
           sarif_file: results.sarif
           category: results
+
+  sbom:
+    name: SBOM - Generate and Publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    needs:
+      - sast
+      - sca
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          scan-type: 'fs'
+          format: 'github'
+          output: 'dependency-results.sbom.json'
+          image-ref: '.'
+          github-pat: ${{ secrets.GITHUB_TOKEN }}
