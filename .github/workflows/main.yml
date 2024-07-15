@@ -371,13 +371,13 @@ jobs:
           provenance: true
           sbom: true
 
-      - name: Attest
-        uses: actions/attest-build-provenance@v1.3.3
-        id: attest
-        with:
-          subject-name: ${{ env.IMAGE-NAMES }}
-          subject-digest: ${{ steps.docker_meta.outputs.digest }}
-          push-to-registry: true
+      # - name: Attest
+      #   uses: actions/attest-build-provenance@v1.3.3
+      #   id: attest
+      #   with:
+      #     subject-name: ${{ env.IMAGE-NAMES }}
+      #     subject-digest: ${{ steps.docker_meta.outputs.digest }}
+      #     push-to-registry: true
 
       - name: Find comment for image tags
         uses: peter-evans/find-comment@v3.1.0
