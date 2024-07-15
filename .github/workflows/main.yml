@@ -115,11 +115,6 @@ jobs:
       PUSH: true
       TAG-RULES: |
         type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
-        type=raw,value=latest,enable={{is_default_branch}},priority=100
-        type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}},priority=300
-        type=ref,event=pr,priority=100
-        type=ref,event=tag,priority=200
-        type=sha
       TARGET: false
 
     steps:
@@ -233,11 +228,6 @@ jobs:
       PUSH: true
       TAG-RULES: |
         type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
-        type=raw,value=latest,enable={{is_default_branch}},priority=100
-        type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}},priority=300
-        type=ref,event=pr,priority=100
-        type=ref,event=tag,priority=200
-        type=sha
       TARGET: false
 
     steps:
@@ -268,7 +258,7 @@ jobs:
       - name: Run Trivy for HIGH,CRITICAL CVEs and report (blocking)
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          image-ref: ${{ steps.docker_meta.outputs.tags }}[1]
+          image-ref: ${{ steps.docker_meta.outputs.tags }}
           exit-code: 0
           ignore-unfixed: true
           vuln-type: 'os,library'
