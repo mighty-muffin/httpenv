@@ -252,13 +252,11 @@ jobs:
         uses: aquasecurity/trivy-action@0.24.0
         with:
           image-ref: ${{ steps.docker_meta.outputs.tags }}
-          format: 'template'
-          template: 'sarif'
+          format: 'sarif'
           output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'trivy-results.sarif'
 
