@@ -209,6 +209,7 @@ jobs:
       contents: read
       packages: read
       security-events: write
+      actions: read
 
     env:
       COMMENT-ENABLE: true
@@ -251,18 +252,15 @@ jobs:
         uses: aquasecurity/trivy-action@0.24.0
         with:
           image-ref: ${{ steps.docker_meta.outputs.tags }}
-          exit-code: 0
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'HIGH,CRITICAL'
-          format: 'sarif'
-          output: 'results.sarif'
+          format: 'template'
+          template: '@/contrib/sarif.tpl'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: results.sarif
-          category: results
+          sarif_file: 'trivy-results.sarif'
 
   build-final-image:
     name: Docker - Build Final Image
@@ -271,6 +269,8 @@ jobs:
 
     needs:
       - build-test-image
+      - sast
+      - sca
 
     outputs:
       image-tag: ${{ steps.docker_meta.outputs.labels }}
