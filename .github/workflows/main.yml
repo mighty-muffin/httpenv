@@ -253,7 +253,7 @@ jobs:
         with:
           image-ref: ${{ steps.docker_meta.outputs.tags }}
           format: 'template'
-          template: '@/contrib/sarif.tpl'
+          template: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
 
