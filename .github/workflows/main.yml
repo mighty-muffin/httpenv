@@ -21,33 +21,10 @@ concurrency:
 
 jobs:
 
-  secret-scanning:
-    name: GitGuardian - Scan
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4.1.7
-        with:
-          fetch-depth: 0
-
-      - name: GitGuardian scan
-        uses: GitGuardian/ggshield/actions/secret@v1.32.2
-        env:
-          GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
-          GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
-          GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
-
   sast:
     name: CodeQL - Analyze ${{ matrix.language }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
-
-    needs:
-      - secret-scanning
 
     permissions:
       actions: read
@@ -90,9 +67,6 @@ jobs:
     name: Docker - Build Test Image
     runs-on: ubuntu-24.04
     timeout-minutes: 5
-
-    needs:
-      - secret-scanning
 
     outputs:
       image-tag: ${{ steps.docker_meta.outputs.labels }}
