@@ -1,18 +1,29 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "dependencyDashboardTitle": "Renovate Dashboard",
     "extends": [
-    ":disableRateLimiting",
-    "docker:enableMajor",
-    ":timezone(America/New_York)",
-    ":semanticCommits",
-    "config:recommended"
+      ":disableRateLimiting",
+      "docker:enableMajor",
+      ":timezone(America/New_York)",
+      ":semanticCommits",
+      "config:recommended"
   ],
   "docker-compose": {
     "fileMatch": [
       "(^|/)docker/.+\\.ya?ml(?:\\.j2)?$"
     ]
   },
+  "kubernetes": {
+    "fileMatch": [
+      "(^|/)k8s/.+\\.ya?ml(?:\\.j2)?$"
+    ]
+  },
   "pre-commit": {
     "enabled": true
+  },
+  "terraform": {
+    "fileMatch": [
+      "(^|/)terraform/.+\\.ya?ml(?:\\.j2)?$"
+    ]
   }
 }

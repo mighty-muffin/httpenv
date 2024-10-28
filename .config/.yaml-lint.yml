@@ -1,6 +1,6 @@
 ---
-ignore: |
-  .github/workflows/
+ignore:
+  - .github/workflows/
 extends: default
 rules:
   braces:

@@ -4,34 +4,40 @@ ci:
   autoupdate_schedule: monthly
   skip:
     - actionlint
+    - commitizen
     - ggshield
 repos:
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.30.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
   - repo: https://github.com/gitguardian/ggshield
     rev: v1.32.2
     hooks:
       - id: ggshield
         language_version: python3
-        stages: [commit]
+        stages: [pre-commit]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
-      # Git style
       - id: check-added-large-files
+        args: [--maxkb=2048]
+      - id: check-case-conflict
+      - id: check-json
       - id: check-merge-conflict
       - id: check-vcs-permalinks
-      - id: forbid-new-submodules
-      # Common errors
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-        args: [--markdown-linebreak-ext=md]
       - id: check-yaml
-        files: .*\.(yaml|yml)$
-      - id: check-merge-conflict
-      - id: check-executables-have-shebangs
-      # Cross platform
-      - id: check-case-conflict
+        files: /.(yaml|yml)$
+      - id: end-of-file-fixer
+      - id: forbid-new-submodules
+      - id: forbid-submodules
       - id: mixed-line-ending
-        args: [--fix=lf]
+        args:
+          - --fix=lf
+      - id: trailing-whitespace
+        args:
+          - --markdown-linebreak-ext=md
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
@@ -41,8 +47,8 @@ repos:
     rev: 0.6.7
     hooks:
       - id: alphabetize-codeowners
-      - id: fix-smartquotes
       - id: fix-ligatures
+      - id: fix-smartquotes
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.42.0
     hooks:
