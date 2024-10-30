@@ -1,10 +1,7 @@
 import contextlib
 import os
-from dotenv import dotenv_values
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from time import sleep
-
-load_dotenv()
 
 HOST = "0.0.0.0"
 PORT = 8080
