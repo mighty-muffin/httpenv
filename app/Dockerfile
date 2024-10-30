@@ -1,4 +1,4 @@
-FROM python:3.12-bullseye AS build
+FROM python:3.13-bullseye AS build
 
 RUN pip install poetry==1.8.4
 
@@ -14,7 +14,7 @@ RUN touch README.md
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
-FROM python:3.12-slim-bullseye AS runtime
+FROM python:3.13-slim-bullseye AS runtime
 
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
