@@ -2,7 +2,7 @@
 name: Continous Integration - Main
 
 on: # yamllint disable-line rule:truthy
-  push:
+  pull_request:
     branches:
       - main
     paths-ignore:
