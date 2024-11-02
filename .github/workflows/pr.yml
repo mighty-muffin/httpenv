@@ -1,10 +1,10 @@
 ---
-name: Continous Integration - Feat/* branches
+name: Continous Integration - Pull Request
 
 on: # yamllint disable-line rule:truthy
-  push:
+  pull_request:
     branches:
-      - feat/*
+      - main
     paths-ignore:
       - 'README.md'
   workflow_dispatch:
