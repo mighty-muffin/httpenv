@@ -1,5 +1,5 @@
 ---
-name: Continous Integration - Main
+name: Continous Integration - Pull Request
 
 on: # yamllint disable-line rule:truthy
   pull_request:
@@ -7,21 +7,42 @@ on: # yamllint disable-line rule:truthy
       - main
     paths-ignore:
       - 'README.md'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
 
 jobs:
+
   secret:
     name: Call Secret Scanning
     uses: irishlab-io/admin/.github/workflows/reusable-secret.yml@main
+
     secrets: inherit
 
   hello-world:
-    needs: secret
     name: Call Hello World
     uses: irishlab-io/admin/.github/workflows/reusable-hello-world.yml@main
+
+    needs:
+      - secret
+
     with:
       comments: "4321tset"
       enable: false
+
+  docker-build-push:
+    name: Call Docker Build
+    uses: irishlab-io/admin/.github/workflows/reusable-docker-build.yml@main
+
+    needs:
+      - secret
+
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+
+    with:
+      context: "./app/"
