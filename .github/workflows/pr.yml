@@ -32,6 +32,17 @@ jobs:
       comments: "4321tset"
       enable: false
 
+  python-poetry:
+    name: Call Python Poetry
+    uses: irishlab-io/admin/.github/workflows/reusable-python-poetry.yml@main
+
+    needs:
+      - hello-world
+
+    with:
+      working_directory: "./app/"
+      python-version: "3.12"
+
   docker-build-push:
     name: Call Docker Build
     uses: irishlab-io/admin/.github/workflows/reusable-docker-build.yml@main
