@@ -1,10 +1,13 @@
 ---
-name: Continous Integration - Feat/* branches
+name: Continous Integration - Branches
 
 on: # yamllint disable-line rule:truthy
   push:
     branches:
+      - dev
       - feat/*
+      - fix/*
+      - rel/*
     paths-ignore:
       - 'README.md'
   workflow_dispatch:
@@ -67,3 +70,19 @@ jobs:
         run: |
           poetry run coverage run -m pytest
           poetry run coverage report -m
+
+  docker-build-push:
+    name: Call Docker Build
+    if: github.ref == 'refs/heads/dev'
+    uses: irishlab-io/admin/.github/workflows/reusable-docker-build.yml@main
+
+    needs:
+      - python-poetry
+
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+
+    with:
+      context: "./app/"
