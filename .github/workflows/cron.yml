@@ -1,0 +1,62 @@
+---
+name: Continous Integration - Cron
+
+on: # yamllint disable-line rule:truthy
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+
+  secret:
+    name: Call Secret Scanning
+    uses: irishlab-io/admin/.github/workflows/reusable-secret.yml@main
+
+    secrets: inherit
+
+  pre-commit:
+    name: Call Pre-Commit for private repo
+    uses: irishlab-io/admin/.github/workflows/reusable-pre-commit.yml@main
+
+    needs:
+      - secret
+
+  hello-world:
+    name: Call Hello World
+    uses: irishlab-io/admin/.github/workflows/reusable-hello-world.yml@main
+
+    needs:
+      - pre-commit
+      - secret
+
+    with:
+      comments: "4321tset"
+      enable: false
+
+  docker-build:
+    name: Call Docker Build
+    uses: irishlab-io/admin/.github/workflows/reusable-docker-build.yml@main
+
+    needs:
+      - pre-commit
+      - secret
+
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+
+    with:
+      context: "./docker/"
+      tag-rules: |
+        type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
+        type=raw,value=nightly,enable={{is_default_branch}},priority=100
+        type=raw,value=nightly-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}},priority=300
+        type=ref,event=pr,priority=100
+        type=ref,event=tag,priority=200
+      image-names: |
+        ghcr.io/${{ github.repository }}

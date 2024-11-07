@@ -71,7 +71,7 @@ jobs:
           poetry run coverage run -m pytest
           poetry run coverage report -m
 
-  docker-build-push:
+  docker-build:
     name: Call Docker Build
     if: github.ref == 'refs/heads/dev'
     uses: irishlab-io/admin/.github/workflows/reusable-docker-build.yml@main
@@ -86,3 +86,9 @@ jobs:
 
     with:
       context: "./app/"
+      tag-rules: |
+        type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
+        type=raw,value=dev,enable={{is_default_branch}},priority=100
+        type=raw,value=dev-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}},priority=300
+        type=ref,event=pr,priority=100
+        type=ref,event=tag,priority=200
