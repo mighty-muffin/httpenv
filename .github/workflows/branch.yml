@@ -1,10 +1,13 @@
 ---
-name: Continous Integration - Pull Request
+name: Continous Integration - Branches
 
 on: # yamllint disable-line rule:truthy
-  pull_request:
+  push:
     branches:
-      - main
+      - dev
+      - feat/*
+      - fix/*
+      - rel/*
     paths-ignore:
       - 'README.md'
   workflow_dispatch:
@@ -15,42 +18,22 @@ concurrency:
 
 jobs:
 
-  secret:
-    name: Call Secret Scanning
-    uses: irishlab-io/admin/.github/workflows/reusable-secret.yml@main
-
-    secrets: inherit
-
-  hello-world:
-    name: Call Hello World
-    uses: irishlab-io/admin/.github/workflows/reusable-hello-world.yml@main
-
-    needs:
-      - secret
-
-    with:
-      comments: "4321tset"
-      enable: false
-
   python-poetry:
     name: Call Python Poetry
     uses: irishlab-io/admin/.github/workflows/reusable-python-poetry.yml@main
-
-    needs:
-      - secret
 
     with:
       working_directory: "./app/"
       python_version: "3.12"
       poetry_version: "1.8.4"
 
-  docker-build-push:
+  docker-build:
     name: Call Docker Build
+    if: github.ref == 'refs/heads/dev'
     uses: irishlab-io/admin/.github/workflows/reusable-docker-build.yml@main
 
     needs:
       - python-poetry
-      - secret
 
     permissions:
       contents: read
@@ -59,3 +42,7 @@ jobs:
 
     with:
       context: "./app/"
+      tag-rules: |
+        type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
+        type=raw,value=dev,priority=100
+        type=raw,value=dev-{{date 'YYYYMMDD'}}-{{sha}},priority=300

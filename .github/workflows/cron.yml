@@ -1,12 +1,9 @@
 ---
-name: Continous Integration - Pull Request
+name: Continous Integration - Cron
 
 on: # yamllint disable-line rule:truthy
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - 'README.md'
+  schedule:
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -21,11 +18,19 @@ jobs:
 
     secrets: inherit
 
+  pre-commit:
+    name: Call Pre-Commit for private repo
+    uses: irishlab-io/admin/.github/workflows/reusable-pre-commit.yml@main
+
+    needs:
+      - secret
+
   hello-world:
     name: Call Hello World
     uses: irishlab-io/admin/.github/workflows/reusable-hello-world.yml@main
 
     needs:
+      - pre-commit
       - secret
 
     with:
@@ -44,13 +49,12 @@ jobs:
       python_version: "3.12"
       poetry_version: "1.8.4"
 
-  docker-build-push:
+  docker-build:
     name: Call Docker Build
     uses: irishlab-io/admin/.github/workflows/reusable-docker-build.yml@main
 
     needs:
       - python-poetry
-      - secret
 
     permissions:
       contents: read
@@ -58,4 +62,8 @@ jobs:
       pull-requests: write
 
     with:
-      context: "./app/"
+      context: "./docker/"
+      tag-rules: |
+        type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
+        type=raw,value=nightly,enable={{is_default_branch}},priority=100
+        type=raw,value=nightly-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}},priority=300
