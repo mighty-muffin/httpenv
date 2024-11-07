@@ -54,8 +54,7 @@ jobs:
     uses: irishlab-io/admin/.github/workflows/reusable-docker-build.yml@main
 
     needs:
-      - pre-commit
-      - secret
+      - python-poetry
 
     permissions:
       contents: read
