@@ -33,7 +33,7 @@ jobs:
       enable: false
 
   python-poetry:
-    name: Call Hello World
+    name: Call Python Poetry
     uses: irishlab-io/admin/.github/workflows/reusable-python-poetry.yml@main
 
     needs:
