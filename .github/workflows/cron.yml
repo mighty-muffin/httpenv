@@ -56,7 +56,3 @@ jobs:
         type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
         type=raw,value=nightly,enable={{is_default_branch}},priority=100
         type=raw,value=nightly-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}},priority=300
-        type=ref,event=pr,priority=100
-        type=ref,event=tag,priority=200
-      image-names: |
-        ghcr.io/${{ github.repository }}

@@ -90,5 +90,3 @@ jobs:
         type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
         type=raw,value=dev,priority=100
         type=raw,value=dev-{{date 'YYYYMMDD'}}-{{sha}},priority=300
-        type=ref,event=pr,priority=100
-        type=ref,event=tag,priority=200
