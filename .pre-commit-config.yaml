@@ -1,5 +1,9 @@
 ---
 fail_fast: false
+default_install_hook_types:
+  - pre-commit
+  - pre-push
+  - commit-msg
 ci:
   autoupdate_schedule: monthly
   skip:
@@ -32,6 +36,8 @@ repos:
       - id: end-of-file-fixer
       - id: forbid-new-submodules
       - id: forbid-submodules
+      - id: no-commit-to-branch
+        args: ['--branch','(main|master)','--pattern','^(?!((dev|fix|feat|renovate)\/[a-zA-Z0-9\-]+)$).*']
       - id: mixed-line-ending
         args:
           - --fix=lf
