@@ -7,8 +7,6 @@ default_install_hook_types:
 ci:
   autoupdate_schedule: monthly
   skip:
-    - actionlint
-    - commitizen
     - ggshield
     - no-commit-to-branch
 repos:
