@@ -2,7 +2,6 @@
 fail_fast: false
 default_install_hook_types:
   - pre-commit
-  - pre-push
   - commit-msg
 ci:
   autoupdate_schedule: monthly
@@ -72,3 +71,11 @@ repos:
     rev: v1.7.4
     hooks:
       - id: actionlint
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.3
+    hooks:
+      - id: ruff
+        args: [ --fix ]
+        files: "^app/"
+      - id: ruff-format
+        files: "^app/"
