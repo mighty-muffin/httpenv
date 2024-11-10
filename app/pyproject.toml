@@ -22,19 +22,19 @@ line-length = 120
 
 [tool.ruff.lint]
 select = [
-    "E",    # pycodestyle errors
-    "W",    # pycodestyle warnings
-    "F",    # pyflakes
-    "I",    # isort
     "B",    # flake8-bugbear
     "C4",   # flake8-comprehensions
+    "D",    # pydocstyle
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "I",    # isort
     "N",    # PEP8 naming convetions
-    "D"     # pydocstyle
+    "W"     # pycodestyle warnings
 ]
 ignore = [
     "C901", # too complex
-    "W191", # indentation contains tabs
-    "D401"  # imperative mood
+    "D401", # imperative mood
+    "W191"  # indentation contains tabs
 ]
 
 
