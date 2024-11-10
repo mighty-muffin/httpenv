@@ -15,8 +15,10 @@ pytest = "^8.3.3"
 coverage = "^7.6.4"
 ruff = "^0.7.3"
 
+
 [tool.ruff]
 line-length = 120
+
 
 [tool.ruff.lint]
 select = [
@@ -35,8 +37,10 @@ ignore = [
     "D401"  # imperative mood
 ]
 
+
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
 
 [build-system]
 requires = ["poetry-core"]
