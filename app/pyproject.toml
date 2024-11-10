@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "httpenv"
 version = "0.1.0"
-description = ""
+description = "Tiny HTTP server showing the environment variables."
 authors = ["Simon Harvey <simon.harvey.86@gmail.com>"]
 readme = "README.md"
 
