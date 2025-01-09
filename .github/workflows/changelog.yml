@@ -1,4 +1,4 @@
-name: Create Changelog Pull Request
+name: Release Changelog - Main
 
 on: # yamllint disable-line rule:truthy
   push:

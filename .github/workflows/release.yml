@@ -1,4 +1,4 @@
-name: Release on .sh changes
+name: Release Create - Cron
 
 on:
   schedule:
