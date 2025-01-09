@@ -67,7 +67,7 @@ repos:
           - -c
           - .config/.yaml-lint.yml
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.4
+    rev: v1.7.6
     hooks:
       - id: actionlint
   - repo: https://github.com/astral-sh/ruff-pre-commit
