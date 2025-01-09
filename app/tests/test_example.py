@@ -1,19 +1,26 @@
-import pytest
+"""Provides some default tests functions."""
 
-# Replacing String with another string
-def test_strReplace():
+
+def test_strreplace():
+    """Replacing String with another string."""
     string = "Hello, World!"
     assert string.replace("H", "J") == "Jello, World!"
-# String Split - Splits a string to two substrings
-def test_strSplit():
+
+
+def test_strsplit():
+    """String Split - Splits a string to two substrings."""
     string = "Hello,World"
     assert string.split(",") == ["Hello", "World"]
-# String Strip
-def test_strStrip():
+
+
+def test_strstrip():
+    """String Strip."""
     string = " Hello, World! "
     assert string.strip() == "Hello, World!"
-# String Concatenate
-def test_strConcat():
+
+
+def test_strconcat():
+    """String Concatenate."""
     string1 = "Hello"
     string2 = "World"
     assert string1 + string2 == "HelloWorld"

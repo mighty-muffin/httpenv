@@ -1,15 +1,20 @@
+"""httpenv python project."""
+
 import contextlib
 import os
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from time import sleep
 
 HOST = "0.0.0.0"
 PORT = 8080
-MESSAGE_API = os.getenv('MESSAGE')
+MESSAGE_API = os.getenv("MESSAGE")
 
 
 class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):
+    """TODO: docs."""
+
+    def do_get(self):
+        """TODO: docs."""
         self.send_response(200)
         self.send_header("Content-Type", "text/plain")
         self.end_headers()
@@ -20,6 +25,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def run(host, port, server_class=HTTPServer, handler_class=Handler):
+    """TODO: docs."""
     server_address = (host, port)
     httpd = server_class(server_address, handler_class)
 

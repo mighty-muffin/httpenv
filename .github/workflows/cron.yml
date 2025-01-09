@@ -11,17 +11,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
   secret:
     name: Call Secret Scanning
-    uses: irishlab-io/admin/.github/workflows/reusable-secret.yml@main
+    uses: mighty-muffin/.github/.github/workflows/reusable-secret.yml@main
 
     secrets: inherit
 
-  hello-world:
-    name: Call Hello World
-    uses: irishlab-io/admin/.github/workflows/reusable-hello-world.yml@main
+  pre-commit:
+    name: Call Pre-Commit for private repo
+    uses: mighty-muffin/.github/.github/workflows/reusable-pre-commit.yml@main
 
     needs:
+      - secret
+
+  hello-world:
+    name: Call Hello World
+    uses: mighty-muffin/.github/.github/workflows/reusable-hello-world.yml@main
+
+    needs:
+      - pre-commit
       - secret
 
     with:
@@ -30,7 +39,7 @@ jobs:
 
   python-poetry:
     name: Call Python Poetry
-    uses: irishlab-io/admin/.github/workflows/reusable-python-poetry.yml@main
+    uses: mighty-muffin/.github/.github/workflows/reusable-python-poetry.yml@main
 
     needs:
       - secret
@@ -42,7 +51,7 @@ jobs:
 
   docker-build:
     name: Call Docker Build
-    uses: irishlab-io/admin/.github/workflows/reusable-docker-build.yml@main
+    uses: mighty-muffin/.github/.github/workflows/reusable-docker-build.yml@main
 
     needs:
       - python-poetry
