@@ -12,17 +12,6 @@ concurrency:
 
 jobs:
 
-  labeler:
-    name: Call GH Labeler
-    uses: mighty-muffin/.github/.github/workflows/reusable-gh-labeler.yml@main
-
-    permissions:
-      contents: read
-      pull-requests: write
-
-    with:
-      configuration_file: ".github/labeler.yml"
-
   secret:
     name: Call Secret Scanning
     uses: mighty-muffin/.github/.github/workflows/reusable-secret.yml@main
@@ -73,7 +62,7 @@ jobs:
       pull-requests: write
 
     with:
-      context: "./docker/"
+      context: "./app/"
       tag-rules: |
         type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
         type=raw,value=nightly,enable={{is_default_branch}},priority=100

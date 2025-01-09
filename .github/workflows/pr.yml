@@ -35,7 +35,6 @@ jobs:
   python-poetry:
     name: Call Python Poetry
     uses: mighty-muffin/.github/.github/workflows/reusable-python-poetry.yml@main
-
     needs:
       - secret
 
