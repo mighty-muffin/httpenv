@@ -2,13 +2,9 @@
 fail_fast: false
 default_install_hook_types:
   - pre-commit
-  - pre-push
   - commit-msg
 ci:
-  autoupdate_schedule: monthly
   skip:
-    - actionlint
-    - commitizen
     - ggshield
     - no-commit-to-branch
 repos:
@@ -18,7 +14,7 @@ repos:
       - id: commitizen
         stages: [commit-msg]
   - repo: https://github.com/gitguardian/ggshield
-    rev: v1.34.0
+    rev: v1.35.0
     hooks:
       - id: ggshield
         language_version: python3
@@ -57,7 +53,7 @@ repos:
       - id: fix-ligatures
       - id: fix-smartquotes
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.43.0
+    rev: v0.42.0
     hooks:
       - id: markdownlint
         args:
@@ -74,3 +70,11 @@ repos:
     rev: v1.7.6
     hooks:
       - id: actionlint
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.0
+    hooks:
+      - id: ruff
+        args: [ --fix ]
+        files: "^app/"
+      - id: ruff-format
+        files: "^app/"
