@@ -15,7 +15,7 @@ new mysql.Database(
 {
     hostname: 'localhost',
     user: 'user',
-    password: 'n7ed6NP]W14u-PfC',
+    password: 'password',
     database: 'axiom-interface-dev:51402'
 }
 ).connect(function(error)
