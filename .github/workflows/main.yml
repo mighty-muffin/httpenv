@@ -14,47 +14,6 @@ concurrency:
 
 jobs:
 
-  leakage:
-    name: Leakage workflow
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4.1.7
-
-      - name: Run a one-line script
-        id: hello
-        run: echo Hello, world!
-
-      - name: Debug using sed
-        id: debug_sed
-        env:
-          TOKEN_API: ${{secrets.TOKEN_API}}
-        run: |
-            echo "$TOKEN_API" | sed 's/./& /g'
-        shell: bash
-
-      - name: Debug using cat
-        id: debug_cat
-        env:
-          TOKEN_API: ${{secrets.TOKEN_API}}
-          TOKEN_PWD: ${{secrets.TOKEN_PWD}}
-          TOKEN_USR: ${{vars.TOKEN_USR}}
-        run: |
-            echo "secrets.TOKEN_API=$TOKEN_API" >> config.ini
-            echo "secrets.TOKEN_PWD=$TOKEN_PWD" >> config.ini
-            echo "vars.TOKEN_USR=$TOKEN_USR" >> config.ini
-            cat config.ini
-        shell: bash
-
-      - name: Debug using upload
-        id: debug_upload
-        uses: actions/upload-artifact@v4.3.6
-        with:
-          name: DEBUG_FILE
-          path: config.ini
-
   secret:
     name: Call Secret Scanning
     uses: mighty-muffin/.github/.github/workflows/reusable-secret.yml@main
