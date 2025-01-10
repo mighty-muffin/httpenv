@@ -3,6 +3,7 @@
 # User-defined
 /.wip
 .env
+.cache_ggshield
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

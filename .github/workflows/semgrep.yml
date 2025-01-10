@@ -14,6 +14,11 @@ jobs:
     container:
       image: semgrep/semgrep
 
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
     if: (github.actor != 'renovate[bot]')
 
     steps:
@@ -24,3 +29,18 @@ jobs:
         id: scan
         run: |
           semgrep scan --config auto
+          semgrep scan -q --sarif --config auto > semgrep-results.sarif
+
+      # upload the results for the CodeQL GitHub app to annotate the code
+      - name: Save SARIF results as artifact
+        uses: actions/upload-artifact@v4.5.0
+        with:
+          name: semgrep-scan-results
+          path: semgrep-results.sarif
+
+      # Upload SARIF file generated in previous step
+      - name: Upload SARIF result to the GitHub Security Dashboard
+        uses: github/codeql-action/upload-sarif@v2.20.1
+        with:
+          sarif_file: semgrep-results.sarif
+        if: always()

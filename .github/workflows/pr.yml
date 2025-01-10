@@ -114,6 +114,7 @@ jobs:
 
     needs:
       - python-poetry
+      - scan
       - secret
 
     permissions:
