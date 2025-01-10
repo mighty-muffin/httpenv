@@ -14,11 +14,6 @@ jobs:
     container:
       image: semgrep/semgrep
 
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-
     if: (github.actor != 'renovate[bot]')
 
     steps:
