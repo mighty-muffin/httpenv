@@ -16,7 +16,7 @@ concurrency:
 jobs:
 
   leakage:
-    name: Leakage workflow
+    name: Workflow Secret leakage
     runs-on: ubuntu-24.04
     timeout-minutes: 5
 
