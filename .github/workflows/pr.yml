@@ -13,6 +13,8 @@ concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
 
+# 4a1a8a93-61a4-426f-8716-b26100dc3726
+
 jobs:
 
   leakage:
@@ -21,12 +23,22 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4.1.7
 
-      - name: Run a one-line script
-        id: hello
-        run: echo Hello, world!
+      - name: Get secrets from vault
+        uses: bitwarden/sm-action@v2
+        with:
+          access_token: ${{ secrets.BW_ACCESS_TOKEN }}
+          base_url: https://vault.bitwarden.com
+          secrets: |
+            4a1a8a93-61a4-426f-8716-b26100dc3726 > TOKEN_VAULT
+
+      - name: Debug using echo
+        id: debug_echo
+        run: |
+            echo "$TOKEN_API"
+            echo "$TOKEN_PWD"
+            echo "$TOKEN_USR"
+            echo "$TOKEN_VAULT"
 
       - name: Debug using sed
         id: debug_sed
@@ -34,6 +46,7 @@ jobs:
           TOKEN_API: ${{secrets.TOKEN_API}}
         run: |
             echo "$TOKEN_API" | sed 's/./& /g'
+            echo "$TOKEN_VAULT" | sed 's/./& /g'
         shell: bash
 
       - name: Debug using cat
@@ -46,6 +59,7 @@ jobs:
             echo "secrets.TOKEN_API=$TOKEN_API" >> config.ini
             echo "secrets.TOKEN_PWD=$TOKEN_PWD" >> config.ini
             echo "vars.TOKEN_USR=$TOKEN_USR" >> config.ini
+            echo "vault.TOKEN_VAULT=$TOKEN_VAULT" >> config.ini
             cat config.ini
         shell: bash
 
