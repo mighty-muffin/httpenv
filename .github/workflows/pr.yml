@@ -13,7 +13,10 @@ concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
 
-# 4a1a8a93-61a4-426f-8716-b26100dc3726
+env:
+  TOKEN_API: ${{secrets.TOKEN_API}}
+  TOKEN_PWD: ${{secrets.TOKEN_PWD}}
+  TOKEN_USR: ${{vars.TOKEN_USR}}
 
 jobs:
 
@@ -35,26 +38,21 @@ jobs:
       - name: Debug using echo
         id: debug_echo
         run: |
-            echo "$TOKEN_API"
-            echo "$TOKEN_PWD"
-            echo "$TOKEN_USR"
-            echo "$TOKEN_VAULT"
+            echo "secrets.TOKEN_API=$TOKEN_API"
+            echo "secrets.TOKEN_PWD=$TOKEN_PWD"
+            echo "vars.TOKEN_USR=$TOKEN_USR"
+            echo "vault.TOKEN_VAULT=$TOKEN_VAULT"
 
       - name: Debug using sed
         id: debug_sed
-        env:
-          TOKEN_API: ${{secrets.TOKEN_API}}
         run: |
-            echo "$TOKEN_API" | sed 's/./& /g'
-            echo "$TOKEN_VAULT" | sed 's/./& /g'
+            echo "secrets.TOKEN_API=$TOKEN_API" | sed 's/./& /g'
+            echo "/n"
+            echo "vault.TOKEN_VAULT=$TOKEN_VAULT" | sed 's/./& /g'
         shell: bash
 
       - name: Debug using cat
         id: debug_cat
-        env:
-          TOKEN_API: ${{secrets.TOKEN_API}}
-          TOKEN_PWD: ${{secrets.TOKEN_PWD}}
-          TOKEN_USR: ${{vars.TOKEN_USR}}
         run: |
             echo "secrets.TOKEN_API=$TOKEN_API" >> config.ini
             echo "secrets.TOKEN_PWD=$TOKEN_PWD" >> config.ini
