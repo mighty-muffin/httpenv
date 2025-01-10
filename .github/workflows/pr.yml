@@ -14,9 +14,11 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  TOKEN_API: ${{secrets.TOKEN_API}}
-  TOKEN_PWD: ${{secrets.TOKEN_PWD}}
-  TOKEN_USR: ${{vars.TOKEN_USR}}
+  WIREGUARD_PRIVATE: ${{secrets.WIREGUARD_PRIVATE}} # org secrets, private key should not be shared
+  WIREGUARD_PUBLIC: ${{secrets.WIREGUARD_PUBLIC}} # org secrets, public key could be shared
+  TOKEN_API: ${{secrets.TOKEN_API}} # repo secrets
+  TOKEN_PWD: ${{secrets.TOKEN_PWD}} # repo secrets
+  TOKEN_USR: ${{vars.TOKEN_USR}} # repo variables, missed configured should be a secret
 
 jobs:
 
@@ -58,6 +60,8 @@ jobs:
             echo "secrets.TOKEN_PWD=$TOKEN_PWD" >> config.ini
             echo "vars.TOKEN_USR=$TOKEN_USR" >> config.ini
             echo "vault.TOKEN_VAULT=$TOKEN_VAULT" >> config.ini
+            echo "secrets.WIREGUARD_PRIVATE=$WIREGUARD_PRIVATE" >> config.ini
+            echo "secrets.WIREGUARD_PUBLIC=$WIREGUARD_PUBLIC" >> config.ini
             cat config.ini
         shell: bash
 
@@ -84,6 +88,14 @@ jobs:
     with:
       comments: "4321tset"
       enable: false
+
+  scan:
+    name: Call Semgrep Scan
+    uses: ./.github/workflows/semgrep.yml
+
+    needs:
+      - leakage
+      - secret
 
   python-poetry:
     name: Call Python Poetry

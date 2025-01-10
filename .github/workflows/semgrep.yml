@@ -1,0 +1,26 @@
+name: Reusable - Semgrep Scan
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+
+  semgrep:
+    name: Workflow Semgrep scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    container:
+      image: semgrep/semgrep
+
+    if: (github.actor != 'renovate[bot]')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Run Semgrep scan
+        id: scan
+        run: |
+          semgrep scan --config auto
