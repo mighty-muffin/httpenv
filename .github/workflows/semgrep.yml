@@ -4,18 +4,12 @@ on:
   workflow_call:
   workflow_dispatch:
 
-permissions: read-all
-
 jobs:
 
   semgrep:
     name: Workflow Semgrep scan
     runs-on: ubuntu-24.04
     timeout-minutes: 5
-
-    permissions:
-      security-events: write
-      id-token: write
 
     container:
       image: semgrep/semgrep
