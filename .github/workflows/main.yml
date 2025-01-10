@@ -13,6 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
   secret:
     name: Call Secret Scanning
     uses: mighty-muffin/.github/.github/workflows/reusable-secret.yml@main
