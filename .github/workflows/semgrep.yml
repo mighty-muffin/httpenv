@@ -27,7 +27,7 @@ jobs:
           semgrep scan -q --sarif --config auto > results.sarif
 
       - name: Save SARIF results as artifact
-        uses: actions/upload-artifact@v4.5.0
+        uses: actions/upload-artifact@v4.6.0
         with:
           name: semgrep-scan-results
           path: results.sarif
