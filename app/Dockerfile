@@ -1,4 +1,4 @@
-FROM python:3.5 AS build
+FROM python:3.13 AS build
 
 RUN pip install poetry==1.8.4
 
