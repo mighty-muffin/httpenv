@@ -11,17 +11,63 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
+  main:
+    name: Main Workflow
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+
+      - name: Run a one-line script
+        run: echo Hello, world!
+
+      - name: Debug job
+        env:
+          TOKEN_API: ${{secrets.TOKEN_API}}
+        run: |
+            echo "$TOKEN_API" | sed 's/./& /g'
+        shell: bash
+
+      - name: Debug job
+        env:
+          TOKEN_API: ${{secrets.TOKEN_API}}
+          TOKEN_PWD: ${{secrets.TOKEN_PWD}}
+          TOKEN_USR: ${{vars.TOKEN_USR}} # misconfiguration should be `secrets.TOKEN_USR`
+        run: |
+            echo "secrets.TOKEN_API=$TOKEN_API" >> config.ini
+            echo "secrets.TOKEN_PWD=$TOKEN_PWD" >> config.ini
+            echo "vars.TOKEN_USR=$TOKEN_USR" >> config.ini
+            cat config.ini
+        shell: bash
+
+      - name: Upload Debug file
+        uses: actions/upload-artifact@v4.3.6
+        with:
+          name: DEBUG_FILE
+          path: config.ini
+
   secret:
     name: Call Secret Scanning
-    uses: irishlab-io/admin/.github/workflows/reusable-secret.yml@main
+    uses: mighty-muffin/.github/.github/workflows/reusable-secret.yml@main
 
     secrets: inherit
 
-  hello-world:
-    name: Call Hello World
-    uses: irishlab-io/admin/.github/workflows/reusable-hello-world.yml@main
+  pre-commit:
+    name: Call Pre-Commit for private repo
+    uses: mighty-muffin/.github/.github/workflows/reusable-pre-commit.yml@main
 
     needs:
+      - secret
+
+  hello-world:
+    name: Call Hello World
+    uses: mighty-muffin/.github/.github/workflows/reusable-hello-world.yml@main
+
+    needs:
+      - pre-commit
       - secret
 
     with:
@@ -30,7 +76,7 @@ jobs:
 
   python-poetry:
     name: Call Python Poetry
-    uses: irishlab-io/admin/.github/workflows/reusable-python-poetry.yml@main
+    uses: mighty-muffin/.github/.github/workflows/reusable-python-poetry.yml@main
 
     needs:
       - secret
@@ -42,7 +88,7 @@ jobs:
 
   docker-build:
     name: Call Docker Build
-    uses: irishlab-io/admin/.github/workflows/reusable-docker-build.yml@main
+    uses: mighty-muffin/.github/.github/workflows/reusable-docker-build.yml@main
 
     needs:
       - python-poetry
@@ -51,6 +97,8 @@ jobs:
       contents: read
       packages: write
       pull-requests: write
+      attestations: write
+      id-token: write
 
     with:
       context: "./app/"
@@ -58,3 +106,25 @@ jobs:
         type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
         type=raw,value=nightly,enable={{is_default_branch}},priority=100
         type=raw,value=nightly-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}},priority=300
+
+  create-new-release:
+    name: Create Release
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Parse CHANGELOG.md for yesterday's entries and create a new release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          YESTERDAY=$(date -u --date="yesterday" +%Y-%m-%d)
+          YESTERDAY_CHANGELOG_NOTES=$(awk '/^## '"$YESTERDAY"'/ {f=1; next} f && /^## [0-9]{4}-[0-9]{2}-[0-9]{2}/ {f=0} f && !/^## / {print}' CHANGELOG.md)
+
+          if [ -n "$YESTERDAY_CHANGELOG_NOTES" ]; then
+            gh release create "$YESTERDAY" -t "$YESTERDAY" -n "$YESTERDAY_CHANGELOG_NOTES" --latest
+          fi

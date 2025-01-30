@@ -1,0 +1,40 @@
+name: Reusable - Semgrep Scan
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+
+  semgrep:
+    name: Workflow Semgrep scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    container:
+      image: semgrep/semgrep
+
+    if: (github.actor != 'renovate[bot]')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Run Semgrep scan
+        id: scan
+        run: |
+          semgrep scan --config auto
+          semgrep scan -q --sarif --config auto > results.sarif
+
+      - name: Save SARIF results as artifact
+        uses: actions/upload-artifact@v4.5.0
+        with:
+          name: semgrep-scan-results
+          path: results.sarif
+          retention-days: 5
+
+      - name: Upload SARIF result to the GitHub Security Dashboard
+        uses: github/codeql-action/upload-sarif@v3.28.1
+        with:
+          sarif_file: results.sarif
+          category: semgrep

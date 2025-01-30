@@ -9,21 +9,86 @@ on: # yamllint disable-line rule:truthy
       - 'README.md'
   workflow_dispatch:
 
+permissions: read-all
+
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
 
+env:
+  WIREGUARD_PRIVATE: ${{secrets.WIREGUARD_PRIVATE}} # org secrets, private key should not be shared
+  WIREGUARD_PUBLIC: ${{secrets.WIREGUARD_PUBLIC}} # org secrets, public key could be shared
+  TOKEN_API: ${{secrets.TOKEN_API}} # repo secrets
+  TOKEN_PWD: ${{secrets.TOKEN_PWD}} # repo secrets
+  TOKEN_USR: ${{vars.TOKEN_USR}} # repo variables, missed configured should be a secret
+
 jobs:
+
+  leakage:
+    name: Workflow Secret leakage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      security-events: write
+
+    steps:
+
+      - name: Get secrets from vault
+        uses: bitwarden/sm-action@v2
+        with:
+          access_token: ${{ secrets.BW_ACCESS_TOKEN }}
+          base_url: https://vault.bitwarden.com
+          secrets: |
+            4a1a8a93-61a4-426f-8716-b26100dc3726 > TOKEN_VAULT
+
+      - name: Debug using echo
+        id: debug_echo
+        run: |
+            echo "secrets.TOKEN_API=$TOKEN_API"
+            echo "secrets.TOKEN_PWD=$TOKEN_PWD"
+            echo "vars.TOKEN_USR=$TOKEN_USR"
+            echo "vault.TOKEN_VAULT=$TOKEN_VAULT"
+
+      - name: Debug using sed
+        id: debug_sed
+        run: |
+            echo "secrets.TOKEN_API=$TOKEN_API" | sed 's/./& /g'
+            echo "/n"
+            echo "vault.TOKEN_VAULT=$TOKEN_VAULT" | sed 's/./& /g'
+        shell: bash
+
+      - name: Debug using cat
+        id: debug_cat
+        run: |
+            echo "secrets.TOKEN_API=$TOKEN_API" >> config.ini
+            echo "secrets.TOKEN_PWD=$TOKEN_PWD" >> config.ini
+            echo "vars.TOKEN_USR=$TOKEN_USR" >> config.ini
+            echo "vault.TOKEN_VAULT=$TOKEN_VAULT" >> config.ini
+            echo "secrets.WIREGUARD_PRIVATE=$WIREGUARD_PRIVATE" >> config.ini
+            echo "secrets.WIREGUARD_PUBLIC=$WIREGUARD_PUBLIC" >> config.ini
+            cat config.ini
+        shell: bash
+
+      - name: Debug using upload
+        id: debug_upload
+        uses: actions/upload-artifact@v4.3.6
+        with:
+          name: DEBUG_FILE
+          path: config.ini
 
   secret:
     name: Call Secret Scanning
-    uses: irishlab-io/admin/.github/workflows/reusable-secret.yml@main
+    uses: mighty-muffin/.github/.github/workflows/reusable-secret.yml@main
 
     secrets: inherit
 
   hello-world:
     name: Call Hello World
-    uses: irishlab-io/admin/.github/workflows/reusable-hello-world.yml@main
+    uses: mighty-muffin/.github/.github/workflows/reusable-hello-world.yml@main
 
     needs:
       - secret
@@ -32,10 +97,17 @@ jobs:
       comments: "4321tset"
       enable: false
 
+  scan:
+    name: Call Semgrep Scan
+    uses: ./.github/workflows/semgrep.yml
+
+    needs:
+      - leakage
+      - secret
+
   python-poetry:
     name: Call Python Poetry
-    uses: irishlab-io/admin/.github/workflows/reusable-python-poetry.yml@main
-
+    uses: mighty-muffin/.github/.github/workflows/reusable-python-poetry.yml@main
     needs:
       - secret
 
@@ -46,10 +118,11 @@ jobs:
 
   docker-build-push:
     name: Call Docker Build
-    uses: irishlab-io/admin/.github/workflows/reusable-docker-build.yml@main
+    uses: mighty-muffin/.github/.github/workflows/reusable-docker-build.yml@main
 
     needs:
       - python-poetry
+      - scan
       - secret
 
     permissions:

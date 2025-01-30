@@ -2,23 +2,19 @@
 fail_fast: false
 default_install_hook_types:
   - pre-commit
-  - pre-push
   - commit-msg
 ci:
-  autoupdate_schedule: monthly
   skip:
-    - actionlint
-    - commitizen
     - ggshield
     - no-commit-to-branch
 repos:
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v3.31.0
+    rev: v4.1.0
     hooks:
       - id: commitizen
         stages: [commit-msg]
   - repo: https://github.com/gitguardian/ggshield
-    rev: v1.33.0
+    rev: v1.36.0
     hooks:
       - id: ggshield
         language_version: python3
@@ -51,7 +47,7 @@ repos:
       - id: remove-crlf
       - id: remove-tabs
   - repo: https://github.com/sirosen/texthooks
-    rev: 0.6.7
+    rev: 0.6.8
     hooks:
       - id: alphabetize-codeowners
       - id: fix-ligatures
@@ -71,6 +67,14 @@ repos:
           - -c
           - .config/.yaml-lint.yml
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.4
+    rev: v1.7.6
     hooks:
       - id: actionlint
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.0
+    hooks:
+      - id: ruff
+        args: [ --fix ]
+        files: "^app/"
+      - id: ruff-format
+        files: "^app/"

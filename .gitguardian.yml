@@ -1,0 +1,8 @@
+---
+version: 2
+
+secret:
+
+  ignored_matches:
+    - name:
+      match: d275a41b3e046beff6ed98b2bd06b9d9883f7b5cebc9a1b9101825f8c5b378af

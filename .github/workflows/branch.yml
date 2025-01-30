@@ -20,7 +20,7 @@ jobs:
 
   python-poetry:
     name: Call Python Poetry
-    uses: irishlab-io/admin/.github/workflows/reusable-python-poetry.yml@main
+    uses: mighty-muffin/.github/.github/workflows/reusable-python-poetry.yml@main
 
     with:
       working_directory: "./app/"
@@ -30,7 +30,7 @@ jobs:
   docker-build:
     name: Call Docker Build
     if: github.ref == 'refs/heads/dev'
-    uses: irishlab-io/admin/.github/workflows/reusable-docker-build.yml@main
+    uses: mighty-muffin/.github/.github/workflows/reusable-docker-build.yml@main
 
     needs:
       - python-poetry
