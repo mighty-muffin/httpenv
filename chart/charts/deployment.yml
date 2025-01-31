@@ -2,20 +2,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flask
-  namespace: http-micro-server
+  name: httpenv
+  namespace: httpenv
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: flask
+      app: httpenv
   template:
     metadata:
       labels:
-        app: flask
+        app: httpenv
     spec:
       containers:
-        - name: flask
+        - name: httpenv
           image: ghcr.io/irish1986/http-micro-server:sha-7ed01a2
           ports:
             - name: http
@@ -61,5 +61,5 @@ spec:
                   - key: app
                     operator: In
                     values:
-                      - flask
+                      - httpenv
               topologyKey: "kubernetes.io/hostname"
