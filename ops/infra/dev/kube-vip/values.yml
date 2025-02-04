@@ -1,0 +1,13 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: kube-vip
+  namespace: kube-system
+spec:
+  values:
+    config:
+      address: "192.168.20.99"
+    env:
+      vip_interface: "enp6s18"
+      vip_cidr: "32"
