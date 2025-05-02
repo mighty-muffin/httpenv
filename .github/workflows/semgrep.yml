@@ -34,7 +34,7 @@ jobs:
           retention-days: 5
 
       - name: Upload SARIF result to the GitHub Security Dashboard
-        uses: github/codeql-action/upload-sarif@v3.28.8
+        uses: github/codeql-action/upload-sarif@v3.28.17
         with:
           sarif_file: results.sarif
           category: semgrep
