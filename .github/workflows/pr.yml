@@ -24,86 +24,38 @@ env:
 
 jobs:
 
-  leakage:
-    name: Workflow Secret leakage
+  pre-commit:
+    name: Call Pre-Commit
+    uses: mighty-muffin/.github/.github/workflows/reusable-pre-commit.yml@main
+
+  secret:
+    needs:
+      - pre-commit
+    name: Call Secret Scanning
+    uses: mighty-muffin/.github/.github/workflows/reusable-secret.yml@main
+    secrets: inherit
+
+  sca:
+    needs:
+      - pre-commit
+    name: Placeholder - Software Composition Analysis
     runs-on: ubuntu-24.04
     timeout-minutes: 5
 
-    permissions:
-      actions: read
-      contents: read
-      id-token: write
-      security-events: write
-
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
 
-      - name: Get secrets from vault
-        uses: bitwarden/sm-action@v2
-        with:
-          access_token: ${{ secrets.BW_ACCESS_TOKEN }}
-          base_url: https://vault.bitwarden.com
-          secrets: |
-            4a1a8a93-61a4-426f-8716-b26100dc3726 > TOKEN_VAULT
-
-      - name: Debug using echo
-        id: debug_echo
-        run: |
-            echo "secrets.TOKEN_API=$TOKEN_API"
-            echo "secrets.TOKEN_PWD=$TOKEN_PWD"
-            echo "vars.TOKEN_USR=$TOKEN_USR"
-            echo "vault.TOKEN_VAULT=$TOKEN_VAULT"
-
-      - name: Debug using sed
-        id: debug_sed
-        run: |
-            echo "secrets.TOKEN_API=$TOKEN_API" | sed 's/./& /g'
-            echo "/n"
-            echo "vault.TOKEN_VAULT=$TOKEN_VAULT" | sed 's/./& /g'
+      - name: Run SCA
+        run: echo Software Composition Analysis
         shell: bash
 
-      - name: Debug using cat
-        id: debug_cat
-        run: |
-            echo "secrets.TOKEN_API=$TOKEN_API" >> config.ini
-            echo "secrets.TOKEN_PWD=$TOKEN_PWD" >> config.ini
-            echo "vars.TOKEN_USR=$TOKEN_USR" >> config.ini
-            echo "vault.TOKEN_VAULT=$TOKEN_VAULT" >> config.ini
-            echo "secrets.WIREGUARD_PRIVATE=$WIREGUARD_PRIVATE" >> config.ini
-            echo "secrets.WIREGUARD_PUBLIC=$WIREGUARD_PUBLIC" >> config.ini
-            cat config.ini
-        shell: bash
-
-      - name: Debug using upload
-        id: debug_upload
-        uses: actions/upload-artifact@v4.6.0
-        with:
-          name: DEBUG_FILE
-          path: config.ini
-
-  secret:
-    name: Call Secret Scanning
-    uses: mighty-muffin/.github/.github/workflows/reusable-secret.yml@main
-
+  sast:
+    needs:
+      - pre-commit
+    name: Call Static Application Security Testing
+    uses: mighty-muffin/.github/.github/workflows/reusable-sast.yml@main
     secrets: inherit
-
-  hello-world:
-    name: Call Hello World
-    uses: mighty-muffin/.github/.github/workflows/reusable-hello-world.yml@main
-
-    needs:
-      - secret
-
-    with:
-      comments: "4321tset"
-      enable: false
-
-  scan:
-    name: Call Semgrep Scan
-    uses: ./.github/workflows/semgrep.yml
-
-    needs:
-      - leakage
-      - secret
 
   python-poetry:
     name: Call Python Poetry
@@ -122,7 +74,8 @@ jobs:
 
     needs:
       - python-poetry
-      - scan
+      - sast
+      - sca
       - secret
 
     permissions:
