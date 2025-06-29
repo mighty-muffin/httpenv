@@ -1,5 +1,5 @@
 ---
-name: Continous Integration - Main
+name: CI - Main
 
 on: # yamllint disable-line rule:truthy
   push:
@@ -14,37 +14,61 @@ concurrency:
 
 jobs:
 
+  pre-commit:
+    name: Call Pre-Commit run
+    uses: irishlab-io/.github/.github/workflows/reusable-pre-commit.yml@main
+
   secret:
+    needs:
+      - pre-commit
     name: Call Secret Scanning
-    uses: mighty-muffin/.github/.github/workflows/reusable-secret.yml@main
-    secrets: inherit
+    uses: irishlab-io/.github/.github/workflows/reusable-secret.yml@main
 
-  hello-world:
-    needs: secret
-    name: Call Hello World
-    uses: mighty-muffin/.github/.github/workflows/reusable-hello-world.yml@main
-    with:
-      comments: "4321tset"
-      enable: false
+    secrets:
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
-  python-poetry:
-    name: Call Python Poetry
-    uses: mighty-muffin/.github/.github/workflows/reusable-python-poetry.yml@main
+  sca:
+    needs:
+      - pre-commit
+    name: Placeholder - Software Composition Analysis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
 
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Run SCA
+        run: echo Software Composition Analysis
+        shell: bash
+
+  sast:
+    needs:
+      - pre-commit
+    name: Call Static Application Security Testing
+    uses: irishlab-io/.github/.github/workflows/reusable-sast.yml@main
+
+    secrets:
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+  unit-test:
     needs:
       - secret
+      - sca
+      - sast
+    name: Run Unit Tests & Integration Tests
+    uses: irishlab-io/.github/.github/workflows/reusable-python-uv.yml@main
 
     with:
-      working_directory: "./app/"
-      python_version: "3.12"
-      poetry_version: "1.8.4"
+      working_directory: "fast-api"
 
   docker-build-push:
-    name: Call Docker Build
-    uses: mighty-muffin/.github/.github/workflows/reusable-docker-build.yml@main
-
     needs:
-      - secret
+      - unit-test
+    name: Call Docker Build
+    uses: irishlab-io/.github/.github/workflows/reusable-docker-build.yml@main
 
     permissions:
       contents: read
@@ -52,4 +76,7 @@ jobs:
       pull-requests: write
 
     with:
-      context: "./app/"
+      file: "./docker/Dockerfile"
+      platforms: |
+          linux/amd64
+          linux/arm64

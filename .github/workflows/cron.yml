@@ -1,5 +1,5 @@
 ---
-name: Continous Integration - Cron
+name: Schedule - Main
 
 on: # yamllint disable-line rule:truthy
   schedule:
@@ -12,8 +12,23 @@ concurrency:
 
 jobs:
 
-  main:
-    name: Main Workflow
+  pre-commit:
+    name: Call Pre-Commit run
+    uses: irishlab-io/.github/.github/workflows/reusable-pre-commit.yml@main
+
+  secret:
+    needs:
+      - pre-commit
+    name: Call Secret Scanning
+    uses: irishlab-io/.github/.github/workflows/reusable-secret.yml@main
+
+    secrets:
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
+  sca:
+    needs:
+      - pre-commit
+    name: Placeholder - Software Composition Analysis
     runs-on: ubuntu-24.04
     timeout-minutes: 5
 
@@ -21,110 +36,46 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.2.2
 
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      - name: Debug job
-        env:
-          TOKEN_API: ${{secrets.TOKEN_API}}
-        run: |
-            echo "$TOKEN_API" | sed 's/./& /g'
+      - name: Run SCA
+        run: echo Software Composition Analysis
         shell: bash
 
-      - name: Debug job
-        env:
-          TOKEN_API: ${{secrets.TOKEN_API}}
-          TOKEN_PWD: ${{secrets.TOKEN_PWD}}
-          TOKEN_USR: ${{vars.TOKEN_USR}} # misconfiguration should be `secrets.TOKEN_USR`
-        run: |
-            echo "secrets.TOKEN_API=$TOKEN_API" >> config.ini
-            echo "secrets.TOKEN_PWD=$TOKEN_PWD" >> config.ini
-            echo "vars.TOKEN_USR=$TOKEN_USR" >> config.ini
-            cat config.ini
-        shell: bash
-
-      - name: Upload Debug file
-        uses: actions/upload-artifact@v4.6.0
-        with:
-          name: DEBUG_FILE
-          path: config.ini
-
-  secret:
-    name: Call Secret Scanning
-    uses: mighty-muffin/.github/.github/workflows/reusable-secret.yml@main
-
-    secrets: inherit
-
-  pre-commit:
-    name: Call Pre-Commit for private repo
-    uses: mighty-muffin/.github/.github/workflows/reusable-pre-commit.yml@main
-
-    needs:
-      - secret
-
-  hello-world:
-    name: Call Hello World
-    uses: mighty-muffin/.github/.github/workflows/reusable-hello-world.yml@main
-
+  sast:
     needs:
       - pre-commit
-      - secret
+    name: Call Static Application Security Testing
+    uses: irishlab-io/.github/.github/workflows/reusable-sast.yml@main
 
-    with:
-      comments: "4321tset"
-      enable: false
+    secrets:
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
 
-  python-poetry:
-    name: Call Python Poetry
-    uses: mighty-muffin/.github/.github/workflows/reusable-python-poetry.yml@main
-
+  unit-test:
     needs:
       - secret
+      - sca
+      - sast
+    name: Run Unit Tests & Integration Tests
+    uses: irishlab-io/.github/.github/workflows/reusable-python-uv.yml@main
 
     with:
-      working_directory: "./app/"
-      python_version: "3.12"
-      poetry_version: "1.8.4"
+      working_directory: "fast-api"
 
-  docker-build:
+  docker-build-push:
+    needs:
+      - unit-test
     name: Call Docker Build
-    uses: mighty-muffin/.github/.github/workflows/reusable-docker-build.yml@main
-
-    needs:
-      - python-poetry
+    uses: irishlab-io/.github/.github/workflows/reusable-docker-build.yml@main
 
     permissions:
       contents: read
       packages: write
       pull-requests: write
-      attestations: write
-      id-token: write
 
     with:
-      context: "./app/"
-      tag-rules: |
-        type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
-        type=raw,value=nightly,enable={{is_default_branch}},priority=100
-        type=raw,value=nightly-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}},priority=300
-
-  create-new-release:
-    name: Create Release
-    runs-on: ubuntu-24.04
-
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Parse CHANGELOG.md for yesterday's entries and create a new release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          YESTERDAY=$(date -u --date="yesterday" +%Y-%m-%d)
-          YESTERDAY_CHANGELOG_NOTES=$(awk '/^## '"$YESTERDAY"'/ {f=1; next} f && /^## [0-9]{4}-[0-9]{2}-[0-9]{2}/ {f=0} f && !/^## / {print}' CHANGELOG.md)
-
-          if [ -n "$YESTERDAY_CHANGELOG_NOTES" ]; then
-            gh release create "$YESTERDAY" -t "$YESTERDAY" -n "$YESTERDAY_CHANGELOG_NOTES" --latest
-          fi
+      file: "./docker/Dockerfile"
+      platforms: |
+          linux/amd64
+          linux/arm64
+      push: false
